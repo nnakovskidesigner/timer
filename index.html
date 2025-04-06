@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Responsive Stage Timer - iOS Style</title>
+    <title>PTimer</title>
+    <link rel="icon" href="hourglass.png" type="image/png" />
     <style>
       * {
         margin: 0;
@@ -98,17 +99,30 @@
       }
       @media (max-width: 600px) {
         .timer-display {
-          font-size: 50px;
+          font-size: 40px;
         }
         .countdown-display {
-          font-size: 20px;
+          font-size: 18px;
+          padding: 12px;
         }
         .timeline-item {
           flex-direction: column;
           align-items: flex-start;
+          padding: 10px;
         }
         .timeline-item span {
           align-self: flex-end;
+          margin-top: 5px;
+        }
+        .btn {
+          padding: 8px 20px;
+          font-size: 14px;
+        }
+        .input-group input {
+          padding: 8px;
+        }
+        .input-group button {
+          padding: 8px 16px;
         }
       }
     </style>
@@ -202,9 +216,15 @@
         timerInterval = setInterval(() => {
           remaining--;
           updateDisplay();
-          if (remaining <= 0 && currentItem < items.length - 1) {
-            loadItem(currentItem + 1);
-            startBtn.click();
+          if (remaining <= 0) {
+            if (currentItem < items.length - 1) {
+              loadItem(currentItem + 1);
+              startBtn.click();
+            } else {
+              clearInterval(timerInterval);
+              countdownDisplay.textContent = "Completed 🎉 Congratulations!";
+              countdownDisplay.style.backgroundColor = "#34c759";
+            }
           }
         }, 1000);
       };
