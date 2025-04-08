@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChatGPT API UI</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <style>
+      body, html {
+        height: 100%;
+        margin: 0;
+        overflow-x: hidden;
+      }
+      body {
+        background-image: url('/d73e00e1c2d1f423fc3a.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .main-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .row {
+        flex-grow: 1;
+        margin: 0;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+      }
+      .left-column, .right-column {
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 15px;
+      }
+      .loading-square {
+        width: 90%;
+        max-width: 450px;
+        height: auto;
+        background-color: white;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+        padding: 20px;
+      }
+      .t-logo {
+        width: 90%;
+        max-width: 450px;
+        height: auto;
+        aspect-ratio: 1 / 1;
+        background-color: white;
+        mask: url("https://asset.brandfetch.io/id6Zt-k0cL/idv447pZnj.png") center / contain no-repeat;
+        box-sizing: border-box;
+        margin-bottom: 0;
+      }
+      label {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      input, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        margin-bottom: 15px;
+      }
+      textarea {
+        resize: none;
+        height: 120px;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+        background: #0078d4;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+      button:hover {
+        background: #005a9e;
+      }
+      .response {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f4f4f9;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        white-space: pre-wrap;
+        font-family: "Courier New", Courier, monospace;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid main-container">
+      <div class="row h-100">
+        <div class="col-12 col-md-6 left-column">
+          <div class="loading-square">
+            <h1>ChatGPT API</h1>
+            <label for="azureEndpoint">Azure Endpoint</label>
+            <input type="text" id="azureEndpoint" placeholder="Enter your Azure endpoint (e.g., https://your-resource-name.openai.azure.com)" />
+            <label for="deploymentId">Deployment ID</label>
+            <input type="text" id="deploymentId" placeholder="Enter your deployment ID" />
+            <label for="apiKey">Azure API Key</label>
+            <input type="text" id="apiKey" placeholder="Enter your Azure API key" />
+            <label for="userInput">Your Query</label>
+            <textarea id="userInput" placeholder="Type your question here..."></textarea>
+            <button id="sendBtn">Send</button>
+            <div id="response" class="response"></div>
+          </div>
+        </div>
+        <div class="col-12 col-md-6 right-column">
+          <div class="t-logo"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const sendBtn = document.getElementById("sendBtn");
+      const azureEndpointInput = document.getElementById("azureEndpoint");
+      const deploymentIdInput = document.getElementById("deploymentId");
+      const apiKeyInput = document.getElementById("apiKey");
+      const userInput = document.getElementById("userInput");
+      const responseDiv = document.getElementById("response");
+
+      // Pre-fill the Azure endpoint, deployment ID, and API key for convenience
+      azureEndpointInput.value = "https://ai-nakovskinikola7064ai419403457163.openai.azure.com";
+      deploymentIdInput.value = "gpt-4o"; // Correct deployment ID
+      apiKeyInput.value = "BhYrNEpCEuOebq0pwgHscucwyTsPuNEalLPfEVLoe9tngnXo4y0sJQQJ99BDACfhMk5XJ3w3AAAAACOGYoi1";
+
+      let tokenUsage = 0; // Track token usage
+      const maxTokensPerMinute = 1000; // Azure OpenAI token limit
+      const requestLimitPerMinute = 6; // Azure OpenAI request limit
+
+      async function fetchWithRetry(url, options, retries = 3, delay = 2000) {
+        for (let i = 0; i < retries; i++) {
+          const response = await fetch(url, options);
+          if (response.status === 429) {
+            if (i < retries - 1) {
+              console.warn(`Rate limit exceeded. Retrying in ${delay}ms...`);
+              await new Promise((resolve) => setTimeout(resolve, delay));
+              delay *= 2; // Exponential backoff
+              continue;
+            } else {
+              throw new Error("Rate limit exceeded. Please try again later.");
+            }
+          }
+          return response;
+        }
+      }
+
+      sendBtn.addEventListener("click", async () => {
+        const azureEndpoint = azureEndpointInput.value.trim();
+        const deploymentId = deploymentIdInput.value.trim();
+        const apiKey = apiKeyInput.value.trim();
+        const query = userInput.value.trim();
+
+        if (!azureEndpoint || !deploymentId || !apiKey || !query) {
+          responseDiv.textContent = "Please provide the Azure endpoint, deployment ID, API key, and query.";
+          return;
+        }
+
+        const estimatedTokens = query.split(" ").length + 50; // Estimate token usage
+        if (tokenUsage + estimatedTokens > maxTokensPerMinute) {
+          responseDiv.textContent = "Token limit exceeded. Please wait before sending another request.";
+          return;
+        }
+
+        responseDiv.textContent = "Loading...";
+
+        try {
+          const url = `${azureEndpoint}/openai/deployments/${deploymentId}/chat/completions?api-version=2025-01-01-preview`;
+          const options = {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              messages: [{ role: "user", content: query }],
+              max_tokens: 4096,
+              temperature: 1.0,
+              top_p: 1.0,
+            }),
+          };
+
+          const response = await fetchWithRetry(url, options);
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status} ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          responseDiv.textContent = data.choices[0].message.content;
+
+          // Update token usage
+          tokenUsage += estimatedTokens;
+
+          // Reset token usage after 1 minute
+          setTimeout(() => {
+            tokenUsage = Math.max(0, tokenUsage - estimatedTokens);
+          }, 60000);
+        } catch (error) {
+          responseDiv.textContent = `Error: ${error.message}`;
+        }
+      });
+    </script>
+  </body>
+</html>

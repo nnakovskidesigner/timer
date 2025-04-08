@@ -151,6 +151,21 @@
           padding: 10px 20px;
         }
       }
+      .screen-flash {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 0, 0, 0.8); /* Red color with opacity */
+        opacity: 0;
+        pointer-events: none;
+        z-index: 9999;
+      }
+      .screen-flash.flash {
+        animation: flash 0.25s ease-in-out 6; /* 6 iterations for 1.5 seconds */
+        opacity: 1; /* Ensure visibility during animation */
+      }
     </style>
   </head>
   <body>
@@ -172,17 +187,20 @@
         <button class="btn" onclick="addItem()">Add</button>
       </div>
       <div id="countdownDisplay" class="countdown-display"></div>
+      <div id="screenFlash" class="screen-flash"></div>
     </div>
 
     <script>
       const iosColors = ["#ff3b30", "#ff9500", "#ffcc00", "#34c759", "#5ac8fa"];
 
       let items = [
-        { name: "Вовед за себе", duration: 300 },
-        { name: "Запознавање со групата", duration: 300 },
-        { name: "Запознавање со темата", duration: 300 },
-        { name: "Презентирање на темата", duration: 2700 },
-        { name: "Заклучок и утврдување на целите", duration: 600 },
+        { name: "Вовед за себе", duration: 180 }, // 3 minutes
+        { name: "Запознавање со групата", duration: 180 }, // 3 minutes
+        { name: "Запознавање со темата", duration: 120 }, // 2 minutes
+        { name: "Теоретски дел", duration: 600 }, // 10 minutes
+        { name: "Практичен дел (демо)", duration: 900 }, // 15 minutes
+        { name: "Англиски дел", duration: 660 }, // 10-12 minutes (average 11 minutes)
+        { name: "Заклучок", duration: 120 }, // 2 minutes
       ];
 
       let currentItem = 0,
@@ -252,6 +270,11 @@
           updateDisplay();
           if (remaining <= 0) {
             if (currentItem < items.length - 1) {
+              // Trigger flash effect on the entire screen
+              const screenFlash = document.getElementById("screenFlash");
+              screenFlash.classList.add("flash");
+              setTimeout(() => screenFlash.classList.remove("flash"), 1500);
+
               loadItem(currentItem + 1);
               startBtn.click();
             } else {
