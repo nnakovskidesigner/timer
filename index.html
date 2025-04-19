@@ -194,10 +194,43 @@
       const iosColors = ["#ff3b30", "#ff9500", "#ffcc00", "#34c759", "#5ac8fa"];
 
       let items = [
-        { name: "First", duration: 5 }, // 5 seconds
-        { name: "Second", duration: 5 }, // 5 seconds
-        { name: "Third", duration: 5 }, // 5 seconds
-        { name: "Fourth", duration: 5 }, // 5 seconds
+        {
+          name: "0-5 мин | Вовед за себе",
+          duration: 300, // 5 minutes
+          description: "Образование, искуство во Телеком, проекти.",
+          language: "Македонски",
+          focus: "Претставување, Искуство",
+        },
+        {
+          name: "5-10 мин | Ангажман",
+          duration: 300, // 5 minutes
+          description: "Прашај: „Кој користел cloud AI?“ Собери искуства.",
+          language: "Македонски",
+          focus: "Ангажман, Публика",
+        },
+        {
+          name: "10-15 мин | Вовед во темата",
+          duration: 300, // 5 minutes
+          description: "Локални AI модели: приватност, офлајн, заштеда.",
+          language: "Македонски",
+          focus: "Локални модели, Приватност",
+        },
+        {
+          name: "15-40 мин | Главна содржина",
+          duration: 1500, // 25 minutes
+          description:
+            "Теорија (10 мин): AI основи, алатки, хардвер, поставки. Демо (10 мин): Инсталирај Ollama, стартувај Mistral во Chatbox/LM Studio.",
+          language: "Македонски (први 10 мин), Англиски (последни 15 мин)",
+          focus: "Алатки, Хардвер, Демо",
+        },
+        {
+          name: "40-45 мин | Заклучок и Q&A",
+          duration: 300, // 5 minutes
+          description:
+            "Резиме, поттикни проба на локален AI, одговарај прашања.",
+          language: "Англиски",
+          focus: "Заклучок, Прашања",
+        },
       ];
 
       let currentItem = 0,

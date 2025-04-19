@@ -4,15 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ChatGPT API UI</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
     <style>
-      body, html {
+      body,
+      html {
         height: 100%;
         margin: 0;
         overflow-x: hidden;
       }
       body {
-        background-image: url('/d73e00e1c2d1f423fc3a.jpg');
+        background-image: url("/d73e00e1c2d1f423fc3a.jpg");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
@@ -33,7 +37,8 @@
         align-items: center;
         justify-content: center;
       }
-      .left-column, .right-column {
+      .left-column,
+      .right-column {
         height: auto;
         display: flex;
         flex-direction: column;
@@ -61,7 +66,8 @@
         height: auto;
         aspect-ratio: 1 / 1;
         background-color: white;
-        mask: url("https://asset.brandfetch.io/id6Zt-k0cL/idv447pZnj.png") center / contain no-repeat;
+        mask: url("https://asset.brandfetch.io/id6Zt-k0cL/idv447pZnj.png")
+          center / contain no-repeat;
         box-sizing: border-box;
         margin-bottom: 0;
       }
@@ -69,7 +75,8 @@
         font-weight: bold;
         margin-bottom: 5px;
       }
-      input, textarea {
+      input,
+      textarea {
         width: 100%;
         padding: 10px;
         border: 1px solid #ddd;
@@ -115,13 +122,28 @@
           <div class="loading-square">
             <h1>ChatGPT API</h1>
             <label for="azureEndpoint">Azure Endpoint</label>
-            <input type="text" id="azureEndpoint" placeholder="Enter your Azure endpoint (e.g., https://your-resource-name.openai.azure.com)" />
+            <input
+              type="text"
+              id="azureEndpoint"
+              placeholder="Enter your Azure endpoint (e.g., https://your-resource-name.openai.azure.com)"
+            />
             <label for="deploymentId">Deployment ID</label>
-            <input type="text" id="deploymentId" placeholder="Enter your deployment ID" />
+            <input
+              type="text"
+              id="deploymentId"
+              placeholder="Enter your deployment ID"
+            />
             <label for="apiKey">Azure API Key</label>
-            <input type="text" id="apiKey" placeholder="Enter your Azure API key" />
+            <input
+              type="text"
+              id="apiKey"
+              placeholder="Enter your Azure API key"
+            />
             <label for="userInput">Your Query</label>
-            <textarea id="userInput" placeholder="Type your question here..."></textarea>
+            <textarea
+              id="userInput"
+              placeholder="Type your question here..."
+            ></textarea>
             <button id="sendBtn">Send</button>
             <div id="response" class="response"></div>
           </div>
@@ -141,9 +163,11 @@
       const responseDiv = document.getElementById("response");
 
       // Pre-fill the Azure endpoint, deployment ID, and API key for convenience
-      azureEndpointInput.value = "https://ai-nakovskinikola7064ai419403457163.openai.azure.com";
+      azureEndpointInput.value =
+        "https://ai-nakovskinikola7064ai419403457163.openai.azure.com";
       deploymentIdInput.value = "gpt-4o"; // Correct deployment ID
-      apiKeyInput.value = "BhYrNEpCEuOebq0pwgHscucwyTsPuNEalLPfEVLoe9tngnXo4y0sJQQJ99BDACfhMk5XJ3w3AAAAACOGYoi1";
+      apiKeyInput.value =
+        "BhYrNEpCEuOebq0pwgHscucwyTsPuNEalLPfEVLoe9tngnXo4y0sJQQJ99BDACfhMk5XJ3w3AAAAACOGYoi1";
 
       let tokenUsage = 0; // Track token usage
       const maxTokensPerMinute = 1000; // Azure OpenAI token limit
@@ -173,13 +197,15 @@
         const query = userInput.value.trim();
 
         if (!azureEndpoint || !deploymentId || !apiKey || !query) {
-          responseDiv.textContent = "Please provide the Azure endpoint, deployment ID, API key, and query.";
+          responseDiv.textContent =
+            "Please provide the Azure endpoint, deployment ID, API key, and query.";
           return;
         }
 
         const estimatedTokens = query.split(" ").length + 50; // Estimate token usage
         if (tokenUsage + estimatedTokens > maxTokensPerMinute) {
-          responseDiv.textContent = "Token limit exceeded. Please wait before sending another request.";
+          responseDiv.textContent =
+            "Token limit exceeded. Please wait before sending another request.";
           return;
         }
 
@@ -191,7 +217,7 @@
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${apiKey}`,
+              Authorization: `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
               messages: [{ role: "user", content: query }],
